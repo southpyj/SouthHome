@@ -1,0 +1,6 @@
+@SouthHome.Backend_HostAddress = http://localhost:5000
+
+GET {{SouthHome.Backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
