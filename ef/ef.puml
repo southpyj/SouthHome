@@ -1,0 +1,35 @@
+@startchen southhome
+entity site_owner{
+    id: long <<key>>
+    nick_name: string
+    name: string
+    birth: DateTime
+    phone: string
+    description: string
+}
+
+entity blog_post{
+    id: long <<key>>
+    user_id: long
+    edit_type: enum
+    post_stutus: enum
+    post_category: enum
+    title: string
+    tags: string
+    content: string
+    timestamp: DateTime
+}
+
+entity project {
+    id: long <<key>>
+    name: string
+    edit_type: enum
+    description: string
+    tags: string
+    start_at: DateTime
+    end_at: DateTime
+    project_url: string
+    project_type: enum
+    project_source: enum
+}
+@endchen

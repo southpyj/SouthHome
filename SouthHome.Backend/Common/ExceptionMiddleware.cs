@@ -3,19 +3,14 @@ using System.Text.Json;
 
 namespace SouthHome.Backend.Common
 {
-    public class ExceptionMiddleware
+    public class ExceptionMiddleware(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
+        private readonly RequestDelegate _next = next;
 
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
-
-        public ExceptionMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
 
         public async Task InvokeAsync(HttpContext context)
         {
