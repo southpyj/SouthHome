@@ -18,6 +18,9 @@ namespace SouthHome.Backend.Entities
         [Column("tag_id")]
         public long TagId { get; protected set; }
 
+        [Column("tag_name")]
+        public string TagName { get; protected set; }
+
         protected BlogPostTag() { }
 
         /// <summary>
@@ -26,12 +29,13 @@ namespace SouthHome.Backend.Entities
         /// <param name="blogPostId">The unique identifier of the blog post associated with the tag.</param>
         /// <param name="tagId">The unique identifier of the tag to associate with the blog post.</param>
         /// <returns>A new <see cref="BlogPostTag"/> instance initialized with the specified blog post ID and tag ID.</returns>
-        public static BlogPostTag Create(long blogPostId, long tagId)
+        public static BlogPostTag Create(long blogPostId, Tag tag)
         {
             return new BlogPostTag
             {
                 BlogPostId = blogPostId,
-                TagId = tagId
+                TagId = tag.Id,
+                TagName = tag.Name
             };
         }
     }
