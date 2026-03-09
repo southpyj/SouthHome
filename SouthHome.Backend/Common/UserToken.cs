@@ -1,4 +1,6 @@
-﻿namespace SouthHome.Backend.Common
+﻿using SouthHome.Backend.Common.Enums;
+
+namespace SouthHome.Backend.Common
 {
     public class UserToken : TokenBase
     {
