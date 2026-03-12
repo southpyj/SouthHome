@@ -47,7 +47,7 @@ namespace SouthHome.Backend.Entities
         /// Gets or sets the phone number associated with the entity.
         /// </summary>
         [MaxLength(11)]
-        [RegularExpression(@"^\d(11)$")]
+        [RegularExpression(@"^\d{11}$")]
         [Column("phone")]
         public string Phone { get; set; } = string.Empty;
 
@@ -88,7 +88,7 @@ namespace SouthHome.Backend.Entities
         /// <param name="avatar">The URL or path to the avatar image of the site owner. Cannot be null or empty.</param>
         /// <param name="birth">The birth date of the site owner.</param>
         /// <returns>A new <see cref="SiteOwner"/> instance initialized with the provided details.</returns>
-        public static SiteOwner CreateInsctance(string nickName, string name, string avatar)
+        public static SiteOwner CreateInstance(string nickName, string name, string avatar)
         {
             return new SiteOwner(nickName, name, avatar);
         }

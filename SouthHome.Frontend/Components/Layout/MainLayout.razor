@@ -1,0 +1,17 @@
+@inherits LayoutComponentBase
+
+<div class="main-layout">
+    <NavigationBar />
+
+    <main class="main-content">
+        @Body
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; @DateTime.Now.Year SouthHome. All rights reserved.</p>
+        </div>
+    </footer>
+</div>
+
+<link rel="stylesheet" href="~/css/layout.css" />
