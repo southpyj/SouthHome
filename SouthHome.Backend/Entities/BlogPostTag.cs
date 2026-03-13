@@ -21,7 +21,9 @@ namespace SouthHome.Backend.Entities
         [Column("tag_name")]
         public string TagName { get; protected set; }
 
+#pragma warning disable CS8618
         protected BlogPostTag() { }
+#pragma warning restore CS8618
 
         /// <summary>
         /// Creates a new instance of the <see cref="BlogPostTag"/> class with the specified blog post ID and tag ID.

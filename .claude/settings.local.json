@@ -5,7 +5,9 @@
       "Bash(taskkill:*)",
       "Bash(dotnet run:*)",
       "Bash(dotnet add:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(\"E:/projects/SouthHome/SouthHome.Frontend.Fluent/SouthHome.Frontend.Fluent.csproj\":*)",
+      "Bash(\"E:/projects/SouthHome/SouthHome.Shared/SouthHome.Shared.csproj\":*)"
     ]
   }
 }

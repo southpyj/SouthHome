@@ -1,5 +1,5 @@
 ﻿using SouthHome.Backend.Common;
-using SouthHome.Backend.Common.Enums;
+using SouthHome.Shared.Common.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,6 +20,13 @@ namespace SouthHome.Backend.Entities
         [Required]
         [Column("user_id")]
         public long UserId { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets the author name of the blog post.
+        /// </summary>
+        [Column("author")]
+        [MaxLength(50)]
+        public string Author { get; set; } = "Nan Sun";
 
         /// <summary>
         /// Gets or sets the unique identifier for the category.

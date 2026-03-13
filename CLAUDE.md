@@ -7,10 +7,14 @@
 SouthHome 是一个前后端分离的个人博客系统：
 - **后端**: ASP.NET Core 8.0 Web API + PostgreSQL + Entity Framework Core
 - **前端**: ASP.NET Core 8.0 + Blazor Interactive Server + Microsoft Fluent UI
+- **共享**: SouthHome.Shared - 前后端共用的 HTTP 模型和枚举
 
 ## 常用命令
 
 ```bash
+# 构建共享项目
+dotnet build SouthHome.Shared/SouthHome.Shared.csproj
+
 # 构建后端
 dotnet build SouthHome.Backend/SouthHome.Backend.csproj
 
@@ -31,6 +35,44 @@ dotnet ef migrations add 迁移名称 --project SouthHome.Backend
 
 # 更新数据库
 dotnet ef database update --project SouthHome.Backend
+```
+
+## 项目结构
+
+```
+SouthHome/
+├── SouthHome.Shared/          # 共享项目（HTTP 模型、枚举）
+│   ├── Common/
+│   │   └── Enums/
+│   │       ├── EditType.cs
+│   │       └── PostStatus.cs
+│   ├── Http/
+│   │   ├── Auth/
+│   │   │   ├── LoginRequest.cs
+│   │   │   ├── LoginResponse.cs
+│   │   │   └── InitSiteOwnerRequest.cs
+│   │   └── BlogPosts/
+│   │       ├── BlogPostDto.cs
+│   │       ├── CreateBlogPostRequest.cs
+│   │       ├── UpdateBlogPostRequest.cs
+│   │       ├── GetPostsQuery.cs
+│   │       └── PagedResult.cs
+│   └── _Imports.cs
+├── SouthHome.Backend/         # 后端 API
+│   ├── Common/
+│   │   ├── Enums/
+│   │   ├── Http/
+│   │   └── Tokens/
+│   ├── Controllers/
+│   ├── DatabaseContext/
+│   ├── Entities/
+│   ├── Services/
+│   └── Migrations/
+└── SouthHome.Frontend.Fluent/ # 前端 Blazor
+    ├── Components/
+    ├── Layout/
+    ├── Pages/
+    └── wwwroot/
 ```
 
 ## 架构设计
@@ -66,12 +108,37 @@ public class MyEntity : EntityBase
 - **Claims**: 序列化为 JSON 存储在 JWT payload 的 `claims` 字段中（非标准 JWT claims）
 - **验证**: HS256 签名，默认 24 小时过期，零时钟偏移
 - **密钥**: 从 `appsettings.json` 的 `SecretString` 读取
+- **用户名**: 固定为 "south"
 
 **重要说明**：创建或验证 token 时，`Claims` 字典会在 payload 内部序列化/反序列化为 JSON。
 
+### 密码加密
+
+使用 HMAC-SHA256 进行密码哈希：
+- **盐值**: 32 字节随机生成的盐
+- **哈希**: 密码 + 盐通过 HMAC-SHA256 计算
+- **存储**: `PasswordHash` 和 `PasswordSalt` 均为 `byte[]` 类型
+
 ### 数据库上下文
 
-`PgSqlContext` 继承自 `DbContext` 但目前为空 —— 需要为所有实体添加 DbSet 后才能创建迁移。
+`PgSqlContext` 包含所有实体的 DbSet：
+
+```csharp
+public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
+public DbSet<Tag> Tags => Set<Tag>();
+public DbSet<BlogPostTag> BlogPostTags => Set<BlogPostTag>();
+public DbSet<PostCategory> PostCategories => Set<PostCategory>();
+public DbSet<PortfolioProject> PortfolioProjects => Set<PortfolioProject>();
+public DbSet<SiteOwner> SiteOwners => Set<SiteOwner>();
+public DbSet<ProtfolioProjectTag> PortfolioProjectTags => Set<ProtfolioProjectTag>();
+```
+
+### 服务层
+
+后端使用服务层模式，所有服务通过依赖注入注册：
+- `IAuthService` - 登录认证和密码哈希
+- `ISeedDataService` - 数据库初始化
+- `IBlogPostService` - 博客文章 CRUD
 
 ### 前端技术栈
 
@@ -208,6 +275,13 @@ $@"document.getElementById('{id}')?.scrollIntoView({{
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 ```
 
+### Shared 项目
+
+所有 HTTP 模型和枚举定义在 `SouthHome.Shared` 项目中，供前后端共用：
+- DTOs: `BlogPostDto`, `LoginResponse`, `PagedResult<T>`
+- Requests: `LoginRequest`, `CreateBlogPostRequest`, `UpdateBlogPostRequest`, etc.
+- Enums: `PostStatus`, `EditType`, `Role`
+
 ## 表命名约定
 
 数据库表使用 `[Table]` 属性指定的 snake_case 命名：
@@ -220,8 +294,29 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 - `portfolio_projects`
 - `protfolio_project_tags`（注意：原拼写有误）
 
-## 已知问题
+## API 端点
 
-- `PgSqlContext` 为空 —— 需要先添加 DbSet 再运行迁移
-- Controllers 和 Models 文件夹为空 —— API 端点和 DTO 尚未实现
-- 博客内容暂使用静态文件加载，后续需通过 API 获取
+### 认证相关
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/auth/login` | 登录获取 JWT Token |
+| POST | `/api/seed/site-owner` | 初始化站点所有者 |
+
+### 博客文章相关
+
+| 方法 | 路径 | 说明 | 权限 |
+|------|------|------|------|
+| GET | `/api/posts` | 获取博客列表（分页、筛选） | 无 |
+| GET | `/api/posts/{id}` | 获取单篇博客 | 无 |
+| POST | `/api/posts` | 创建博客 | SiteOwnerOnly |
+| PUT | `/api/posts/{id}` | 更新博客 | SiteOwnerOnly |
+| DELETE | `/api/posts/{id}` | 删除博客 | SiteOwnerOnly |
+| GET | `/api/posts/tags` | 获取所有标签 | 无 |
+
+### 认证说明
+
+使用 JWT Bearer Token 进行认证：
+- 请求头格式: `Authorization: Bearer {token}`
+- 用户名固定为 "south"
+- 密码在初始化站点所有者时设置

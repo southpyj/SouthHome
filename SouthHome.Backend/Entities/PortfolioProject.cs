@@ -1,5 +1,5 @@
 ﻿using SouthHome.Backend.Common;
-using SouthHome.Backend.Common.Enums;
+using SouthHome.Shared.Common.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SouthHome.Backend.Entities

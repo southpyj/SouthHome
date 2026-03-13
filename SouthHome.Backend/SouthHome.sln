@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SouthHome.Backend", "SouthH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SouthHome.Frontend.Fluent", "..\SouthHome.Frontend.Fluent\SouthHome.Frontend.Fluent.csproj", "{72FC3996-1D2E-4D88-9BE2-64C4AA48741C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SouthHome.Shared", "..\SouthHome.Shared\SouthHome.Shared.csproj", "{AFE599C8-8CF8-42D7-B662-8FE3781549FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{72FC3996-1D2E-4D88-9BE2-64C4AA48741C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72FC3996-1D2E-4D88-9BE2-64C4AA48741C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72FC3996-1D2E-4D88-9BE2-64C4AA48741C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFE599C8-8CF8-42D7-B662-8FE3781549FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFE599C8-8CF8-42D7-B662-8FE3781549FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFE599C8-8CF8-42D7-B662-8FE3781549FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFE599C8-8CF8-42D7-B662-8FE3781549FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

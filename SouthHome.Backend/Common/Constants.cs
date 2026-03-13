@@ -5,9 +5,9 @@
     /// </summary>
     public static class Constants
     {
-        private static string _env = "";  // 当前使用的环境变量的值
+        private static string _env = "Development";  // 当前使用的环境变量的值
 
-        private static string _envFile = $"appsettings{_env}.json";  // 环境变量文件名
+        private static string _envFile = $"appsettings.{_env}.json";  // 环境变量文件名
 
         private static readonly IConfigurationRoot _configuration;  // 配置根对象
 

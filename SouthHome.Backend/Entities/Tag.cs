@@ -13,7 +13,9 @@ namespace SouthHome.Backend.Entities
         [Required]
         public string Name { get; set; }
 
+#pragma warning disable CS8618
         protected Tag() { }
+#pragma warning restore CS8618
 
         /// <summary>
         /// Creates a new instance of the <see cref="Tag"/> class with the specified name.
