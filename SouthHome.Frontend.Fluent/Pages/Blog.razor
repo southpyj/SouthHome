@@ -1,0 +1,223 @@
+@page "/blog"
+
+@inject NavigationManager NavigationManager
+
+<PageTitle>Blog - SouthHome</PageTitle>
+
+@code {
+    public class BlogPost
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public DateTime Date { get; set; }
+        public string Summary { get; set; }
+        public List<string> Tags { get; set; }
+    }
+
+    private List<BlogPost> blogPosts = new()
+    {
+        new()
+        {
+            Id = "1",
+            Title = "ASP.NET Core 中间件深入解析",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 3, 13),
+            Summary = "深入了解 ASP.NET Core 中间件的工作原理。",
+            Tags = new() { ".NET", "后端" }
+        },
+        new()
+        {
+            Id = "2",
+            Title = "Kubernetes 集群部署最佳实践",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 3, 12),
+            Summary = "分享在生产环境中部署 Kubernetes 集群的经验。",
+            Tags = new() { "Kubernetes", "DevOps" }
+        },
+        new()
+        {
+            Id = "3",
+            Title = "MongoDB 性能优化指南",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 3, 11),
+            Summary = "从索引设计到查询优化，全面介绍 MongoDB 性能调优的技巧。",
+            Tags = new() { "MongoDB", "数据库" }
+        },
+        new()
+        {
+            Id = "4",
+            Title = "Java 并发编程实战",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 3, 10),
+            Summary = "深入理解 Java 并发编程的核心概念，包括线程池、锁机制等。",
+            Tags = new() { "Java", "后端" }
+        },
+        new()
+        {
+            Id = "5",
+            Title = "微服务架构设计模式",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 3, 9),
+            Summary = "探讨微服务架构中的常见设计模式，包括服务发现、熔断降级等。",
+            Tags = new() { "架构", ".NET", "DevOps" }
+        },
+        new()
+        {
+            Id = "6",
+            Title = "Docker 容器化部署指南",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 3, 8),
+            Summary = "从零开始学习 Docker 容器技术，掌握镜像构建和容器编排。",
+            Tags = new() { "Docker", "DevOps" }
+        }
+    };
+
+    private HashSet<string> availableTags = new();
+    private HashSet<string> selectedTags = new();
+
+    private List<BlogPost> filteredPosts => blogPosts
+        .Where(p => selectedTags.Count == 0 || selectedTags.All(st => p.Tags.Contains(st)))
+        .ToList();
+
+    protected override void OnInitialized()
+    {
+        availableTags = new HashSet<string>(blogPosts.SelectMany(p => p.Tags).Distinct());
+    }
+
+    private void ToggleTag(string tag)
+    {
+        if (selectedTags.Contains(tag))
+        {
+            selectedTags.Remove(tag);
+        }
+        else
+        {
+            selectedTags.Add(tag);
+        }
+    }
+
+    private void ClearAllTags()
+    {
+        selectedTags.Clear();
+    }
+}
+
+<FluentStack Orientation="Orientation.Vertical"
+             Gap="30"
+             Style="padding:40px;max-width:1200px;margin:auto;">
+
+    <!-- 标签筛选区 -->
+    <FluentCard Style="padding:20px;border-radius:16px;" Elevation="4">
+        <FluentStack Orientation="Orientation.Vertical" Gap="16">
+
+            <!-- 筛选标题和清除按钮 -->
+            <FluentStack Orientation="Orientation.Horizontal"
+                         HorizontalAlign="HorizontalAlign.SpaceBetween"
+                         VerticalAlign="VerticalAlign.Center">
+
+                <FluentTypography Style="font-weight:600;">
+                    按标签筛选
+                </FluentTypography>
+
+                @if (selectedTags.Count > 0)
+                {
+                    <FluentButton Appearance="Appearance.Outline"
+                                  OnClick="ClearAllTags"
+                                  Style="font-size:0.85rem;padding:4px 12px;">
+                        清除 (@selectedTags.Count)
+                    </FluentButton>
+                }
+            </FluentStack>
+
+            <!-- 标签列表 -->
+            <FluentStack Orientation="Orientation.Horizontal"
+                         Wrap="true"
+                         Gap="8">
+
+                @foreach (var tag in availableTags)
+                {
+                    <FluentBadge Appearance="@GetTagAppearance(tag)"
+                                 Style="cursor:pointer;padding:6px 14px;"
+                                 OnClick="@(() => ToggleTag(tag))">
+                        @tag
+                    </FluentBadge>
+                }
+
+            </FluentStack>
+
+        </FluentStack>
+    </FluentCard>
+
+    <!-- 博客列表 -->
+    <FluentStack Orientation="Orientation.Horizontal"
+                 Wrap="true"
+                 Gap="24">
+
+        @foreach (var post in filteredPosts)
+        {
+            <a href="/post/@post.Id" style="text-decoration:none;">
+                <FluentCard Style="width:350px;padding:24px;border-radius:16px;" Elevation="8">
+
+                    <FluentStack Orientation="Orientation.Vertical" Gap="12">
+
+                    <!-- 标题 -->
+                    <FluentTypography Typography="Typography.PaneHeader" Style="font-size:1.2rem;">
+                        @post.Title
+                    </FluentTypography>
+
+                    <!-- 作者和日期 -->
+                    <FluentStack Orientation="Orientation.Horizontal"
+                                 HorizontalAlign="HorizontalAlign.SpaceBetween"
+                                 Style="color:#999;font-size:0.85rem;">
+                        <FluentTypography>
+                            @post.Author
+                        </FluentTypography>
+                        <FluentTypography>
+                            @post.Date.ToString("yyyy-MM-dd")
+                        </FluentTypography>
+                    </FluentStack>
+
+                    <!-- 摘要 -->
+                    <FluentTypography Style="color:#666;">
+                        @post.Summary
+                    </FluentTypography>
+
+                    <!-- Tags -->
+                    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Gap="6">
+
+                        @foreach (var tag in post.Tags)
+                        {
+                            <FluentBadge Appearance="Appearance.Neutral"
+                                         Style="font-size:0.8rem;padding:4px 10px;">
+                                @tag
+                            </FluentBadge>
+                        }
+
+                    </FluentStack>
+
+                </FluentStack>
+
+            </FluentCard>
+            </a>
+        }
+
+        @if (filteredPosts.Count == 0)
+        {
+            <FluentStack Style="width:100%;text-align:center;color:#999;padding:40px;">
+                <FluentTypography>
+                    没有找到匹配的文章
+                </FluentTypography>
+            </FluentStack>
+        }
+
+    </FluentStack>
+
+</FluentStack>
+
+@code {
+    private Appearance GetTagAppearance(string tag)
+    {
+        return selectedTags.Contains(tag) ? Appearance.Accent : Appearance.Neutral;
+    }
+}

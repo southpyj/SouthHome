@@ -18,10 +18,13 @@ dotnet build SouthHome.Backend/SouthHome.Backend.csproj
 dotnet run --project SouthHome.Backend/SouthHome.Backend.csproj
 
 # 构建前端
-dotnet build SouthHome.Frontend/SouthHome.Frontend.csproj
+dotnet build SouthHome.Frontend.Fluent/SouthHome.Frontend.Fluent.csproj
 
 # 运行前端
-dotnet run --project SouthHome.Frontend/SouthHome.Frontend.csproj
+dotnet run --project SouthHome.Frontend.Fluent/SouthHome.Frontend.Fluent.csproj
+
+# 安装前端依赖
+dotnet restore SouthHome.Frontend.Fluent/SouthHome.Frontend.Fluent.csproj
 
 # 添加 EF 迁移（配置好 DbContext 后）
 dotnet ef migrations add 迁移名称 --project SouthHome.Backend
@@ -76,6 +79,7 @@ public class MyEntity : EntityBase
 - **UI 组件库**: Microsoft Fluent UI (v4.12.0)
 - **图标库**: Font Awesome 6.4.0
 - **配色主题**: 黑红配色 (#1a1a1a → #dc2626)
+- **Markdown 渲染**: Blazorise.Markdown (v1.8.8)
 
 ### 配置要求
 
@@ -106,21 +110,21 @@ public class MyEntity : EntityBase
 ## 前端项目结构
 
 ```
-SouthHome.Frontend/
+SouthHome.Frontend.Fluent/
 ├── Components/
 │   ├── App.razor              # 应用根组件
-│   ├── _Imports.razor          # 全局导入
-│   ├── Layout/
-│   │   └── MainLayout.razor   # 主布局
-│   ├── Shared/
-│   │   └── NavigationBar.razor # 导航栏
-│   └── Pages/
-│       └── Home.razor        # 主页
+│   └── _Imports.razor          # 全局导入
+├── Layout/
+│   └── MainLayout.razor   # 主布局
 ├── Pages/
-│   ├── _Host.cshtml            # 主机页面
-│   └── _Layout.cshtml         # HTML 布局
+│   ├── Home.razor        # 主页
+│   ├── Blog.razor        # 博客列表页（含标签筛选）
+│   └── Post.razor        # 文章详情页（含目录功能）
 ├── Program.cs                   # 应用入口
-└── wwwroot/css/               # 样式文件
+└── wwwroot/
+    ├── css/                   # 样式文件
+    ├── content/               # Markdown 文章文件
+    └── images/                # 图片资源
 ```
 
 ## 前端开发规范
@@ -150,19 +154,64 @@ SouthHome.Frontend/
 - `FluentCard` - 卡片
 - `FluentText` - 文本
 - `FluentBadge` - 徽章
-- `FluentIcon` - 图标
 
-## 已知问题
+## 前端功能模块
 
-- `PgSqlContext` 为空 —— 需要先添加 DbSet 再运行迁移
-- `SiteOwner.CreateInsctance` 拼写错误（应为 `CreateInstance`）
-- `SiteOwner.Phone` 正则表达式错误（`@"^\d(11)$"` 应为 `@"^\d{11}$"`）
-- Controllers 和 Models 文件夹为空 —— API 端点和 DTO 尚未实现
-- 前端博客、作品集、关于我、联系页面待实现
+### 主页 (Home.razor)
+- 圆形头像显示
+- 四个功能卡片：项目、博客、游戏、联系方式
+- 点击博客卡片可跳转到博客列表页
+
+### 博客列表页 (Blog.razor)
+- 标签筛选区（多选标签）
+- 清除选中标签按钮
+- 博客文章卡片列表
+- 点击卡片跳转到文章详情页
+
+### 文章详情页 (Post.razor)
+- 文章头部：标题、作者、日期、标签
+- Markdown 内容渲染（从文件加载）
+- 目录功能：
+  - 右上角固定显示
+  - 点击目录项跳转到对应章节
+  - 滚动监听自动高亮当前章节
+- 回到顶部按钮（滚动超过 300px 后显示）
+
+### Markdown 文件加载
+- 文章内容存放在 `wwwroot/content/post-{id}.md`
+- 使用 `HttpClient` 异步加载文件内容
+- 自定义 Markdown 解析器（支持标题、代码块、列表、表格等）
+
+## 重要注意事项
+
+### Blazor 字符串插值与花括号
+
+当需要在 C# 字符串插值中输出包含花括号的 JavaScript 对象时：
+
+```csharp
+// ❌ 错误 - 与插值语法冲突
+$"document.getElementById('{id}')?.scrollIntoView({{ behavior: 'smooth' }})";
+
+// ✅ 正确 - 使用原始字符串字面量
+$@"document.getElementById('{id}')?.scrollIntoView({{
+    behavior: 'smooth',
+    block: 'start'
+}});";
+```
+
+`@""` 告诉编译器不要解析字符串中的任何特殊字符，直接按字面量处理。
+
+### HTTP 客户端配置
+
+`Program.cs` 中已注册 `HttpClient`：
+```csharp
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+```
 
 ## 表命名约定
 
 数据库表使用 `[Table]` 属性指定的 snake_case 命名：
+
 - `site_owners`
 - `blog_posts`
 - `blog_post_tags`
@@ -170,3 +219,9 @@ SouthHome.Frontend/
 - `tags`
 - `portfolio_projects`
 - `protfolio_project_tags`（注意：原拼写有误）
+
+## 已知问题
+
+- `PgSqlContext` 为空 —— 需要先添加 DbSet 再运行迁移
+- Controllers 和 Models 文件夹为空 —— API 端点和 DTO 尚未实现
+- 博客内容暂使用静态文件加载，后续需通过 API 获取
