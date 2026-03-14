@@ -4,105 +4,6 @@
 
 <PageTitle>Blog - SouthHome</PageTitle>
 
-@code {
-    public class BlogPost
-    {
-        public string Id { get; set; }
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public DateTime Date { get; set; }
-        public string Summary { get; set; }
-        public List<string> Tags { get; set; }
-    }
-
-    private List<BlogPost> blogPosts = new()
-    {
-        new()
-        {
-            Id = "1",
-            Title = "ASP.NET Core 中间件深入解析",
-            Author = "Nan Sun",
-            Date = new DateTime(2024, 3, 13),
-            Summary = "深入了解 ASP.NET Core 中间件的工作原理。",
-            Tags = new() { ".NET", "后端" }
-        },
-        new()
-        {
-            Id = "2",
-            Title = "Kubernetes 集群部署最佳实践",
-            Author = "Nan Sun",
-            Date = new DateTime(2024, 3, 12),
-            Summary = "分享在生产环境中部署 Kubernetes 集群的经验。",
-            Tags = new() { "Kubernetes", "DevOps" }
-        },
-        new()
-        {
-            Id = "3",
-            Title = "MongoDB 性能优化指南",
-            Author = "Nan Sun",
-            Date = new DateTime(2024, 3, 11),
-            Summary = "从索引设计到查询优化，全面介绍 MongoDB 性能调优的技巧。",
-            Tags = new() { "MongoDB", "数据库" }
-        },
-        new()
-        {
-            Id = "4",
-            Title = "Java 并发编程实战",
-            Author = "Nan Sun",
-            Date = new DateTime(2024, 3, 10),
-            Summary = "深入理解 Java 并发编程的核心概念，包括线程池、锁机制等。",
-            Tags = new() { "Java", "后端" }
-        },
-        new()
-        {
-            Id = "5",
-            Title = "微服务架构设计模式",
-            Author = "Nan Sun",
-            Date = new DateTime(2024, 3, 9),
-            Summary = "探讨微服务架构中的常见设计模式，包括服务发现、熔断降级等。",
-            Tags = new() { "架构", ".NET", "DevOps" }
-        },
-        new()
-        {
-            Id = "6",
-            Title = "Docker 容器化部署指南",
-            Author = "Nan Sun",
-            Date = new DateTime(2024, 3, 8),
-            Summary = "从零开始学习 Docker 容器技术，掌握镜像构建和容器编排。",
-            Tags = new() { "Docker", "DevOps" }
-        }
-    };
-
-    private HashSet<string> availableTags = new();
-    private HashSet<string> selectedTags = new();
-
-    private List<BlogPost> filteredPosts => blogPosts
-        .Where(p => selectedTags.Count == 0 || selectedTags.All(st => p.Tags.Contains(st)))
-        .ToList();
-
-    protected override void OnInitialized()
-    {
-        availableTags = new HashSet<string>(blogPosts.SelectMany(p => p.Tags).Distinct());
-    }
-
-    private void ToggleTag(string tag)
-    {
-        if (selectedTags.Contains(tag))
-        {
-            selectedTags.Remove(tag);
-        }
-        else
-        {
-            selectedTags.Add(tag);
-        }
-    }
-
-    private void ClearAllTags()
-    {
-        selectedTags.Clear();
-    }
-}
-
 <FluentStack Orientation="Orientation.Vertical"
              Gap="30"
              Style="padding:40px;max-width:1200px;margin:auto;">
@@ -116,9 +17,9 @@
                          HorizontalAlign="HorizontalAlign.SpaceBetween"
                          VerticalAlign="VerticalAlign.Center">
 
-                <FluentTypography Style="font-weight:600;">
+                <span style="font-weight:600;">
                     按标签筛选
-                </FluentTypography>
+                </span>
 
                 @if (selectedTags.Count > 0)
                 {
@@ -149,73 +50,351 @@
         </FluentStack>
     </FluentCard>
 
-    <!-- 博客列表 -->
+    <!-- 主内容区：时间线 + 文章列表 -->
     <FluentStack Orientation="Orientation.Horizontal"
-                 Wrap="true"
-                 Gap="24">
+                 Gap="30"
+                 AlignItems="AlignItems.FlexStart">
 
-        @foreach (var post in filteredPosts)
-        {
-            <a href="/post/@post.Id" style="text-decoration:none;">
-                <FluentCard Style="width:350px;padding:24px;border-radius:16px;" Elevation="8">
+        <!-- 左侧时间线 -->
+        <div class="timeline-container">
+            @foreach (var group in groupedPosts)
+            {
+                var isExpanded = expandedMonths.Contains(group.Key);
 
-                    <FluentStack Orientation="Orientation.Vertical" Gap="12">
+                <!-- 月份标题 -->
+                <div class="timeline-month @(isExpanded ? "" : "collapsed")" @onclick="@(() => ToggleMonth(group.Key))">
+                    @group.Key
+                </div>
 
-                    <!-- 标题 -->
-                    <FluentTypography Typography="Typography.PaneHeader" Style="font-size:1.2rem;">
-                        @post.Title
-                    </FluentTypography>
-
-                    <!-- 作者和日期 -->
-                    <FluentStack Orientation="Orientation.Horizontal"
-                                 HorizontalAlign="HorizontalAlign.SpaceBetween"
-                                 Style="color:#999;font-size:0.85rem;">
-                        <FluentTypography>
-                            @post.Author
-                        </FluentTypography>
-                        <FluentTypography>
-                            @post.Date.ToString("yyyy-MM-dd")
-                        </FluentTypography>
-                    </FluentStack>
-
-                    <!-- 摘要 -->
-                    <FluentTypography Style="color:#666;">
-                        @post.Summary
-                    </FluentTypography>
-
-                    <!-- Tags -->
-                    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Gap="6">
-
-                        @foreach (var tag in post.Tags)
+                @if (isExpanded)
+                {
+                    <!-- 展开的月份：显示具体日期 -->
+                    <div class="timeline-items">
+                        @foreach (var post in group.OrderByDescending(p => p.Date))
                         {
-                            <FluentBadge Appearance="Appearance.Neutral"
-                                         Style="font-size:0.8rem;padding:4px 10px;">
-                                @tag
-                            </FluentBadge>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">@post.Date.ToString("MM/dd")</div>
+                            </div>
                         }
+                    </div>
+                }
+            }
+        </div>
 
+        <!-- 右侧文章列表 -->
+        <FluentStack Orientation="Orientation.Vertical" Gap="24" Style="flex:1;">
+
+            @foreach (var group in groupedPosts)
+            {
+                var isExpanded = expandedMonths.Contains(group.Key);
+
+                @if (isExpanded)
+                {
+                    // 展开的月份：垂直排列
+                    @foreach (var post in group.OrderByDescending(p => p.Date))
+                    {
+                        <a href="/post/@post.Id" style="text-decoration:none;">
+                            <FluentCard Style="width:350px;padding:24px;border-radius:16px;" Elevation="8">
+
+                                <FluentStack Orientation="Orientation.Vertical" Gap="12">
+
+                                    <!-- 标题 -->
+                                    <span style="font-size:1.2rem;font-weight:600;">
+                                        @post.Title
+                                    </span>
+
+                                    <!-- 作者和日期 -->
+                                    <FluentStack Orientation="Orientation.Horizontal"
+                                                 HorizontalAlign="HorizontalAlign.SpaceBetween"
+                                                 Style="color:#999;font-size:0.85rem;">
+                                        <span>
+                                            @post.Author
+                                        </span>
+                                        <span>
+                                            @post.Date.ToString("yyyy-MM-dd")
+                                        </span>
+                                    </FluentStack>
+
+                                    <!-- 摘要 -->
+                                    <span style="color:#666;">
+                                        @post.Summary
+                                    </span>
+
+                                    <!-- Tags -->
+                                    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Gap="6">
+
+                                        @foreach (var tag in post.Tags)
+                                        {
+                                            <FluentBadge Appearance="Appearance.Neutral"
+                                                         Style="font-size:0.8rem;padding:4px 10px;">
+                                                @tag
+                                            </FluentBadge>
+                                        }
+
+                                    </FluentStack>
+
+                                </FluentStack>
+
+                            </FluentCard>
+                        </a>
+                    }
+                }
+                else
+                {
+                    // 折叠的月份：水平排列，显示完整内容
+                    <FluentStack Orientation="Orientation.Horizontal" Gap="16" Wrap="true">
+                        @foreach (var post in group.OrderByDescending(p => p.Date))
+                        {
+                            <a href="/post/@post.Id" style="text-decoration:none;">
+                                <FluentCard Style="width:350px;padding:24px;border-radius:16px;" Elevation="8">
+
+                                    <FluentStack Orientation="Orientation.Vertical" Gap="12">
+
+                                        <span style="font-size:1.2rem;font-weight:600;">
+                                            @post.Title
+                                        </span>
+
+                                        <FluentStack Orientation="Orientation.Horizontal"
+                                                     HorizontalAlign="HorizontalAlign.SpaceBetween"
+                                                     Style="color:#999;font-size:0.85rem;">
+                                            <span>
+                                                @post.Author
+                                            </span>
+                                            <span>
+                                                @post.Date.ToString("yyyy-MM-dd")
+                                            </span>
+                                        </FluentStack>
+
+                                        <span style="color:#666;">
+                                            @post.Summary
+                                        </span>
+
+                                        <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Gap="6">
+
+                                            @foreach (var tag in post.Tags)
+                                            {
+                                                <FluentBadge Appearance="Appearance.Neutral"
+                                                             Style="font-size:0.8rem;padding:4px 10px;">
+                                                    @tag
+                                                </FluentBadge>
+                                            }
+
+                                        </FluentStack>
+
+                                    </FluentStack>
+
+                                </FluentCard>
+                            </a>
+                        }
                     </FluentStack>
+                }
+            }
 
+            @if (!groupedPosts.Any())
+            {
+                <FluentStack Style="width:100%;text-align:center;color:#999;padding:40px;">
+                    <span>
+                        没有找到匹配的文章
+                    </span>
                 </FluentStack>
+            }
 
-            </FluentCard>
-            </a>
-        }
-
-        @if (filteredPosts.Count == 0)
-        {
-            <FluentStack Style="width:100%;text-align:center;color:#999;padding:40px;">
-                <FluentTypography>
-                    没有找到匹配的文章
-                </FluentTypography>
-            </FluentStack>
-        }
+        </FluentStack>
 
     </FluentStack>
 
 </FluentStack>
 
+<style>
+    .timeline-container {
+        width: 100px;
+        flex-shrink: 0;
+        padding-top: 4px;
+    }
+
+    .timeline-month {
+        font-weight: 600;
+        font-size: 0.95rem;
+        font-family: Georgia, serif;
+        color: #999;
+        padding: 12px 0 8px;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .timeline-month:hover {
+        color: #333;
+    }
+
+    /* 折叠状态下的月份 - 对齐到文章位置 */
+    .timeline-month.collapsed {
+        height: 180px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 0;
+    }
+
+    .timeline-items {
+        padding-left: 12px;
+        border-left: 2px solid #e0e0e0;
+        margin-left: 4px;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 180px;
+        box-sizing: border-box;
+    }
+
+    .timeline-item-collapsed {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 180px;
+        box-sizing: border-box;
+    }
+
+    .timeline-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #bbb;
+        flex-shrink: 0;
+        margin-left: -17px;
+    }
+
+    .timeline-date {
+        font-size: 1rem;
+        font-family: Georgia, serif;
+        color: #aaa;
+    }
+</style>
+
 @code {
+    public class BlogPost
+    {
+        public string Id { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Author { get; set; } = "";
+        public DateTime Date { get; set; }
+        public string Summary { get; set; } = "";
+        public List<string> Tags { get; set; } = new();
+    }
+
+    private List<BlogPost> blogPosts = new()
+    {
+        new()
+        {
+            Id = "1",
+            Title = "ASP.NET Core 中间件深入解析",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 3, 13),
+            Summary = "深入了解 ASP.NET Core 中间件的工作原理。",
+            Tags = new() { ".NET", "后端" }
+        },
+        new()
+        {
+            Id = "2",
+            Title = "Kubernetes 集群部署最佳实践",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 3, 12),
+            Summary = "分享在生产环境中部署 Kubernetes 集群的经验。",
+            Tags = new() { "Kubernetes", "DevOps" }
+        },
+        new()
+        {
+            Id = "3",
+            Title = "MongoDB 性能优化指南",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 2, 11),
+            Summary = "从索引设计到查询优化，全面介绍 MongoDB 性能调优的技巧。",
+            Tags = new() { "MongoDB", "数据库" }
+        },
+        new()
+        {
+            Id = "4",
+            Title = "Java 并发编程实战",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 2, 10),
+            Summary = "深入理解 Java 并发编程的核心概念，包括线程池、锁机制等。",
+            Tags = new() { "Java", "后端" }
+        },
+        new()
+        {
+            Id = "5",
+            Title = "微服务架构设计模式",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 1, 9),
+            Summary = "探讨微服务架构中的常见设计模式，包括服务发现、熔断降级等。",
+            Tags = new() { "架构", ".NET", "DevOps" }
+        },
+        new()
+        {
+            Id = "6",
+            Title = "Docker 容器化部署指南",
+            Author = "Nan Sun",
+            Date = new DateTime(2024, 1, 8),
+            Summary = "从零开始学习 Docker 容器技术，掌握镜像构建和容器编排。",
+            Tags = new() { "Docker", "DevOps" }
+        }
+    };
+
+    private HashSet<string> availableTags = new();
+    private HashSet<string> selectedTags = new();
+    private HashSet<string> expandedMonths = new();
+
+    private IEnumerable<IGrouping<string, BlogPost>> groupedPosts => blogPosts
+        .Where(p => selectedTags.Count == 0 || selectedTags.All(st => p.Tags.Contains(st)))
+        .GroupBy(p => p.Date.ToString("yyyy年MM月"))
+        .OrderByDescending(g => DateTime.Parse(g.Key.Replace("年", "-").Replace("月", "-01")));
+
+    private IEnumerable<BlogPost> allPosts => blogPosts
+        .Where(p => selectedTags.Count == 0 || selectedTags.All(st => p.Tags.Contains(st)))
+        .OrderByDescending(p => p.Date);
+
+    protected override void OnInitialized()
+    {
+        availableTags = new HashSet<string>(blogPosts.SelectMany(p => p.Tags).Distinct());
+        // 默认展开所有月份
+        foreach (var month in groupedPosts)
+        {
+            expandedMonths.Add(month.Key);
+        }
+    }
+
+    private void ToggleMonth(string month)
+    {
+        if (expandedMonths.Contains(month))
+        {
+            expandedMonths.Remove(month);
+        }
+        else
+        {
+            expandedMonths.Add(month);
+        }
+    }
+
+    private void ToggleTag(string tag)
+    {
+        if (selectedTags.Contains(tag))
+        {
+            selectedTags.Remove(tag);
+        }
+        else
+        {
+            selectedTags.Add(tag);
+        }
+    }
+
+    private void ClearAllTags()
+    {
+        selectedTags.Clear();
+    }
+
     private Appearance GetTagAppearance(string tag)
     {
         return selectedTags.Contains(tag) ? Appearance.Accent : Appearance.Neutral;

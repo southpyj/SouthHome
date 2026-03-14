@@ -21,13 +21,13 @@
     @if (isLoading)
     {
         <FluentStack Style="padding:60px;text-align:center;">
-            <FluentTypography Style="color:#999;">加载中...</FluentTypography>
+            <span style="color:#999;">加载中...</span>
         </FluentStack>
     }
     else if (!string.IsNullOrEmpty(errorMessage))
     {
         <FluentStack Style="padding:60px;text-align:center;">
-            <FluentTypography Style="color:#dc2626;">@errorMessage</FluentTypography>
+            <span style="color:#dc2626;">@errorMessage</span>
         </FluentStack>
     }
     else
@@ -38,18 +38,18 @@
             <FluentStack Orientation="Orientation.Vertical" Gap="20">
 
                 <!-- 标题 -->
-                <FluentTypography Style="font-size:2.2rem;font-weight:700;">
+                <span style="font-size:2.2rem;font-weight:700;">
                     @postTitle
-                </FluentTypography>
+                </span>
 
                 <!-- 元信息 -->
                 <FluentStack Orientation="Orientation.Horizontal" Gap="24" Style="color:#999;">
-                    <FluentTypography>
+                    <span>
                         @postAuthor
-                    </FluentTypography>
-                    <FluentTypography>
+                    </span>
+                    <span>
                         @postDate
-                    </FluentTypography>
+                    </span>
                 </FluentStack>
 
             </FluentStack>
@@ -76,9 +76,9 @@
             {
                 <div class="toc-container">
                     <div class="toc-header">
-                        <FluentTypography Style="font-weight:600;font-size:0.95rem;">
+                        <span style="font-weight:600;font-size:0.95rem;">
                             目录
-                        </FluentTypography>
+                        </span>
                     </div>
                     <FluentStack Orientation="Orientation.Vertical" Gap="4">
 

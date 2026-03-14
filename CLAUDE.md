@@ -5,8 +5,8 @@
 ## 项目概述
 
 SouthHome 是一个前后端分离的个人博客系统：
-- **后端**: ASP.NET Core 8.0 Web API + PostgreSQL + Entity Framework Core
-- **前端**: ASP.NET Core 8.0 + Blazor Interactive Server + Microsoft Fluent UI
+- **后端**: ASP.NET Core 10.0 Web API + PostgreSQL + Entity Framework Core
+- **前端**: ASP.NET Core 10.0 + Blazor WebAssembly + Microsoft Fluent UI
 - **共享**: SouthHome.Shared - 前后端共用的 HTTP 模型和枚举
 
 ## 常用命令
@@ -142,9 +142,9 @@ public DbSet<ProtfolioProjectTag> PortfolioProjectTags => Set<ProtfolioProjectTa
 
 ### 前端技术栈
 
-- **框架**: ASP.NET Core 8.0 + Blazor Interactive Server
-- **UI 组件库**: Microsoft Fluent UI (v4.12.0)
-- **图标库**: Font Awesome 6.4.0
+- **框架**: ASP.NET Core 10.0 + Blazor WebAssembly
+- **UI 组件库**: Microsoft Fluent UI (v4.14.0)
+- **图标库**: Fluent UI Icons (@microsoft/fluentui-system-icons)
 - **配色主题**: 黑红配色 (#1a1a1a → #dc2626)
 - **Markdown 渲染**: Blazorise.Markdown (v1.8.8)
 
@@ -199,7 +199,7 @@ SouthHome.Frontend.Fluent/
 ### 命名约定
 - 使用 Fluent UI 组件时使用 PascalCase（如 `FluentStack`、`FluentButton`）
 - 自定义类名使用 kebab-case（如 `social-card`、`post-card`）
-- 图标使用 Font Awesome（如 `fa-solid fa-house`）
+- 图标使用 Fluent UI Icons（如 `Icons.Regular.Size24.Home`）
 
 ### 配色方案
 
@@ -232,6 +232,8 @@ SouthHome.Frontend.Fluent/
 ### 博客列表页 (Blog.razor)
 - 标签筛选区（多选标签）
 - 清除选中标签按钮
+- 左侧时间线（按月份分组展示）
+- 时间线月份可折叠/展开，对齐文章位置
 - 博客文章卡片列表
 - 点击卡片跳转到文章详情页
 
